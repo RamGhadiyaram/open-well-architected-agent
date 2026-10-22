@@ -1,0 +1,66 @@
+{
+  "account_ids": [
+    "123456789012"
+  ],
+  "business_goals": "Prioritize cost savings while maintaining high availability for production workloads and strong security posture.",
+  "findings_count": 7,
+  "recommendations": [
+    {
+      "id": "sample-1",
+      "title": "ALB Not Using HTTPS Listener",
+      "description": "Application Load Balancer prod-alb only has an HTTP listener on port 80. Traffic is not encrypted in transit.",
+      "pillar": "security",
+      "level": "resource",
+      "severity": "critical",
+      "priority_score": 100.0,
+      "estimated_monthly_savings_usd": null,
+      "trade_offs": [
+        "Review impact on availability and performance before applying.",
+        "Enforcing encryption or HTTPS may require certificate management and minor application changes."
+      ],
+      "related_findings": [],
+      "business_goal_alignment": "Directly addresses security concerns that align with the stated business goals.",
+      "remediations": [
+        {
+          "type": "console",
+          "title": "Add HTTPS listener on ALB",
+          "content": "1. Open EC2 → Load Balancers → select prod-alb\n2. Listeners tab → Add listener\n3. Protocol: HTTPS, Port: 443\n4. Select an ACM certificate\n5. Forward to the existing target group\n6. (Optional) Redirect HTTP:80 → HTTPS:443",
+          "estimated_effort": "medium",
+          "risk_if_applied": "low"
+        },
+        {
+          "type": "terraform",
+          "title": "HTTPS listener + redirect",
+          "content": "resource \"aws_lb_listener\" \"https\" { ... }",
+          "estimated_effort": "medium",
+          "risk_if_applied": "low"
+        }
+      ]
+    },
+    {
+      "id": "sample-2",
+      "title": "Underutilized Amazon EC2 Instances",
+      "description": "Instance i-0abc123def456 (m5.2xlarge) has average CPU < 5% and network I/O < 5 MB/s over the last 14 days.",
+      "pillar": "cost",
+      "level": "resource",
+      "severity": "high",
+      "priority_score": 95.0,
+      "estimated_monthly_savings_usd": 120.0,
+      "trade_offs": [
+        "Review impact on availability and performance before applying.",
+        "Right-sizing may reduce headroom for traffic spikes."
+      ],
+      "related_findings": [],
+      "business_goal_alignment": "Directly addresses cost concerns that align with the stated business goals.",
+      "remediations": [
+        {
+          "type": "cli",
+          "title": "Inspect metrics then right-size or stop",
+          "content": "aws cloudwatch get-metric-statistics ...\naws ec2 stop-instances --instance-ids i-0abc123def456",
+          "estimated_effort": "medium",
+          "risk_if_applied": "medium"
+        }
+      ]
+    }
+  ]
+}
